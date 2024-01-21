@@ -31,7 +31,39 @@ void initCalibrateCmd(CalibrateCmd* cmd) {
 
 void initCommand(Command* cmd, char type, void* c) {
   cmd->type = type;
-  cmd->calibrate = (CalibrateCmd*)c;
+}
+
+float bytesToFloat(char* data) {
+  // big endian
+  return (float)(
+    (int)data[1] << 0x18 |
+    (int)data[2] << 0x10 |
+    (int)data[3] << 0x08 |
+    (int)data[4]
+  );
+} 
+
+void parseControlCmd(char* data, ControlCmd* cmd) {
+  for (int i = 1; data[i] != '\0'; i++) {
+    switch (data[i]) {
+      case 'x':
+        setControlX(cmd, bytesToFloat(&data[i+1]));
+        i += 4;
+        break;
+      case 'y':
+        setControlY(cmd, bytesToFloat(&data[i+1]));
+        i += 4;
+        break;
+      case 's':
+        setControlLaser(cmd, data[i+1]);
+        i += 1;
+        break;
+    }
+  }
+}
+
+void parseCalibrateCmd(char* data, CalibrateCmd* cmd) {
+  cmd->blCorner = { };
 }
 
 void parseCommand(char* data, Command* cmd) {
@@ -42,5 +74,14 @@ void parseCommand(char* data, Command* cmd) {
   //   y = _y
   //   l = _laser 
   // }
-  
+  switch (data[0]) {
+    case CONTROL_CMD:
+      cmd->type = CONTROL_CMD;
+      parseControlCmd(data, &cmd->control);
+      break;
+    case CALIBRATE_CMD:
+      cmd->type = CALIBRATE_CMD;
+      parseCalibrateCmd(data, &cmd->calibrate);
+      break;
+  }
 }

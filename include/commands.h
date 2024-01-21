@@ -30,8 +30,8 @@ typedef struct Command {
   char type;
   
   union {
-    ControlCmd* control;
-    CalibrateCmd* calibrate;
+    ControlCmd control;
+    CalibrateCmd calibrate;
   };
 } Command;
 
