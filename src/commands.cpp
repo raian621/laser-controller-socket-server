@@ -27,8 +27,8 @@ void setControlLaser(ControlCmd* cmd, char laserOn) {
 
 void initCalibrateCmd(CalibrateCmd* cmd) {
   for (int i = 0; i < 4; i++) {
-    ((Point*)cmd)[1].x = 0.0f;
-    ((Point*)cmd)[1].y = 0.0f;
+    ((Point*)cmd)[i].x = 0.0f;
+    ((Point*)cmd)[i].y = 0.0f;
   }
 }
 
@@ -68,7 +68,10 @@ void parseControlCmd(char* data, ControlCmd* cmd) {
 }
 
 void parseCalibrateCmd(char* data, CalibrateCmd* cmd) {
-  cmd->blCorner = { };
+  for (int i = 0; i < 4; i++) {
+    (((Point*)cmd)[i]).x = bytesToFloat((unsigned char*)&data[8*i]);
+    (((Point*)cmd)[i]).y = bytesToFloat((unsigned char*)&data[8*i+4]);
+  }
 }
 
 void parseCommand(char* data, Command* cmd) {

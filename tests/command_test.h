@@ -15,6 +15,15 @@ void loadControlCommandFrameData(float x, float y, char laser, char* data) {
   printf("%s\n", data);
 }
 
+void floatToBytes(float x, unsigned char bytes[4]) {
+  unsigned int rawBits = *(unsigned int*)&x;
+
+  bytes[0] = 0xff & (rawBits >> 24);
+  bytes[1] = 0xff & (rawBits >> 16);
+  bytes[2] = 0xff & (rawBits >> 8);
+  bytes[3] = 0xff & rawBits;
+}
+
 TEST(CommandTests, ParseControlCommandFrameTest) {
   float x = 1.2f;
   float y = 5.2f;
@@ -30,6 +39,33 @@ TEST(CommandTests, ParseControlCommandFrameTest) {
   EXPECT_NEAR(cmd.control.y, y, 0.00001);
   ASSERT_FALSE(cmd.control.laserOn);
   ASSERT_EQ(cmd.control.enabled, X_ENABLED|Y_ENABLED|LASER_ENABLED);
+}
+
+TEST(CommandTests, ParseCalibrationCommandFrame) {
+  CalibrateCmd expected = {
+    topLeft:     { 1.0f, 2.0f  },
+    topRight:    { 3.0f, 4.1f  },
+    bottomLeft:  { 5.1f, 1.43f },
+    bottomRight: { 2.3f, 9.5f  },
+  };
+
+  char rawBytes[34] = { [0]=CALIBRATE_CMD };
+  unsigned char buf[4];
+  for (int i = 0; i < 4; i++) {
+    floatToBytes(((Point*)&expected)[i].x, buf);
+    memcpy((void*)&rawBytes[1 + 8*i], (void*)buf, 4 * sizeof(char));
+    floatToBytes(((Point*)&expected)[i].y, buf);
+    memcpy((void*)&rawBytes[5 + 8*i], (void*)buf, 4 * sizeof(char));
+  }
+
+  CalibrateCmd actual;
+  initCalibrateCmd(&actual);
+  parseCommand(rawBytes, (Command*)&actual);
+
+  for (int i = 0; i < 4; i++) {
+    EXPECT_FLOAT_EQ(((Point*)&expected)[i].x, ((Point*)&expected)[i].x);
+    EXPECT_FLOAT_EQ(((Point*)&expected)[i].y, ((Point*)&expected)[i].y);
+  }
 }
 
 TEST(CommandTests, TestBytesToFloat) {

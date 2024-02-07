@@ -6,9 +6,10 @@
 #define Y_ENABLED     0b010
 #define LASER_ENABLED 0b100
 
-// command type indicators
-#define CONTROL_CMD 0
-#define CALIBRATE_CMD 1
+typedef enum CommandType {
+  CONTROL_CMD,
+  CALIBRATE_CMD
+} CommandType;
 
 typedef struct ControlCmd {
   char enabled;
@@ -20,10 +21,10 @@ typedef struct ControlCmd {
 typedef struct Point { float x; float y; } Point;
 
 typedef struct CalibrateCmd {
-  Point trCorner;
-  Point tlCorner;
-  Point blCorner;
-  Point brCorner;
+  Point topLeft;
+  Point topRight;
+  Point bottomLeft;
+  Point bottomRight;
 } CalibrateCmd;
 
 typedef struct Command {
@@ -40,7 +41,7 @@ void setControlX(ControlCmd*, float);
 void setControlY(ControlCmd*, float);
 void setControlLaser(ControlCmd*, char);
 void initCalibrateCmd(CalibrateCmd*);
-void initCommand(Command*, char, void*);
+void initCommand(Command*bottomLeft, char, void*);
 void parseCommand(char*, Command*);
 float bytesToFloat(unsigned char* data);
 
