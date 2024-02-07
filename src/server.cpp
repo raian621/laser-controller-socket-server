@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
@@ -8,6 +9,7 @@
 
 #include "server.h"
 #include "controller.h"
+#include "signal_handler.h"
 
 int listenForCommands(char* sockPath) {
   int serverSocket;
@@ -33,13 +35,11 @@ int listenForCommands(char* sockPath) {
       printf("%.1024s\n", buf);
     }
 
-
-
     close(clientSocket);
   }
 
-  closeServerSocket(serverSocket);
-  return 0; 
+  closeServerSocket(serverSocket, sockPath);
+  return 0;
 }
 
 // returns file descriptor to a newly created Unix Domain Socket at path 
@@ -67,18 +67,21 @@ int createServerSocket(char *sockPath) {
   if (bind(serverSocket, (const struct sockaddr*)&serverSockAddr, len) == -1){
     printf("BIND ERROR\n");
     close(serverSocket);
+    unlink(sockPath);
     return -1;
   }
 
   return serverSocket;
 }
 
-int closeServerSocket(int serverSocket) {
+int closeServerSocket(int serverSocket, char* sockPath) {
   printf("closing the socket");
   if (close(serverSocket) == -1) {
     perror("close error");
+    unlink(sockPath);
     return -1;
   }
+  unlink(sockPath);
 
   return 0;
 }

@@ -3,6 +3,6 @@
 
 int listenForCommands(char*);
 int createServerSocket(char*);
-int closeServerSocket(int);
+int closeServerSocket(int, char*);
 
 #endif

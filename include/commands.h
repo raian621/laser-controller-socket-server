@@ -39,11 +39,9 @@ void initControlCmd(ControlCmd*);
 void setControlX(ControlCmd*, float);
 void setControlY(ControlCmd*, float);
 void setControlLaser(ControlCmd*, char);
-
 void initCalibrateCmd(CalibrateCmd*);
-
 void initCommand(Command*, char, void*);
-
 void parseCommand(char*, Command*);
+float bytesToFloat(unsigned char* data);
 
 #endif

@@ -2,6 +2,7 @@
 
 printUsage() {
   echo "Usage: $0 [mode]"
+  echo "modes: prod, tests, no_pgpio"
 }
 
 mode=$1

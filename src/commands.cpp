@@ -1,3 +1,6 @@
+#include <iostream>
+#include <bitset>
+
 #include "commands.h"
 
 void initControlCmd(ControlCmd* cmd) {
@@ -33,25 +36,27 @@ void initCommand(Command* cmd, char type, void* c) {
   cmd->type = type;
 }
 
-float bytesToFloat(char* data) {
+float bytesToFloat(unsigned char* data) {
   // big endian
-  return (float)(
-    (int)data[1] << 0x18 |
-    (int)data[2] << 0x10 |
-    (int)data[3] << 0x08 |
-    (int)data[4]
+  unsigned int rawBits = (
+    ((unsigned int)data[0] << 24) |
+    ((unsigned int)data[1] << 16) |
+    ((unsigned int)data[2] << 8) |
+    (unsigned int)data[3]
   );
+
+  return *(float*)&rawBits;
 } 
 
 void parseControlCmd(char* data, ControlCmd* cmd) {
   for (int i = 1; data[i] != '\0'; i++) {
     switch (data[i]) {
       case 'x':
-        setControlX(cmd, bytesToFloat(&data[i+1]));
+        setControlX(cmd, bytesToFloat((unsigned char*)&data[i+1]));
         i += 4;
         break;
       case 'y':
-        setControlY(cmd, bytesToFloat(&data[i+1]));
+        setControlY(cmd, bytesToFloat((unsigned char*)&data[i+1]));
         i += 4;
         break;
       case 's':
@@ -67,7 +72,7 @@ void parseCalibrateCmd(char* data, CalibrateCmd* cmd) {
 }
 
 void parseCommand(char* data, Command* cmd) {
-  // type data
+  // type data:
   // - calibrate | x1 | y1 | x2 | y2 | x3 | y3 | x4 | y4
   // - control {
   //   x = _x

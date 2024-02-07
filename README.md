@@ -53,7 +53,7 @@ Key | Type | Value
 `"y"` | `float` | `y` rotation of the laser arm
 `"s"` | `char / bool` | `laser` on or off
 
-** Control Command Frame Structure:
+**Control Command Frame Structure:**
 
 Byte(s) | Value
 --|--
